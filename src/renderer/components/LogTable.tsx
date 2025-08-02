@@ -153,10 +153,14 @@ const LogTable: React.FC = () => {
         <DataGrid
           rows={rows}
           columns={columns}
-          pageSize={50}
-          rowsPerPageOptions={[25, 50, 100]}
+          initialState={{
+            pagination: {
+              paginationModel: { page: 0, pageSize: 50 },
+            },
+          }}
+          pageSizeOptions={[25, 50, 100]}
           checkboxSelection={false}
-          disableSelectionOnClick
+          disableRowSelectionOnClick
           density="compact"
           sx={{
             '& .MuiDataGrid-cell': {

@@ -18,7 +18,7 @@ import {
   WifiTetheringOff as DisconnectedIcon,
 } from '@mui/icons-material';
 import { RootState, AppDispatch } from '../store/store';
-import { toggleTheme } from '../store/settingsSlice';
+import { toggleTheme } from '../store/settingSlice';
 import { format } from 'date-fns';
 
 interface HeaderProps {

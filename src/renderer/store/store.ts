@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import qsoReducer from './qsoSlice';
-import settingsReducer from './settingsSlice';
+import settingsReducer from './settingSlice';
 import contestReducer from './contestSlice';
 import clusterReducer from './clusterSlice';
 

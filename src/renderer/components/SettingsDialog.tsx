@@ -21,7 +21,7 @@ import {
   Slider,
 } from '@mui/material';
 import { RootState, AppDispatch } from '../store/store';
-import { updateSettings } from '../store/settingsSlice';
+import { updateSettings } from '../store/settingSlice';
 
 interface TabPanelProps {
   children?: React.ReactNode;

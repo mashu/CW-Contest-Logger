@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import { RootState, AppDispatch } from './store/store';
-import { loadSettings } from './store/settingsSlice';
+import { loadSettings } from './store/settingSlice';
 import { loadQSOs } from './store/qsoSlice';
 import Header from './components/Header';
 import LogTable from './components/LogTable';
