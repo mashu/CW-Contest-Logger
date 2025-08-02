@@ -1,252 +1,58 @@
 # CW Contest Logger
 
-A professional, cross-platform CW (Continuous Wave) contest logging application built with Electron, React, and TypeScript. Features real-time DX cluster integration, RBN (Reverse Beacon Network) support, world map visualization, and ADI/ADIF export capabilities.
+[![GitHub Release](https://img.shields.io/github/v/release/mashu/CW-Contest-Logger?include_prereleases&label=Latest%20Release)](https://github.com/mashu/CW-Contest-Logger/releases/latest)
+[![GitHub Downloads](https://img.shields.io/github/downloads/mashu/CW-Contest-Logger/total?label=Downloads)](https://github.com/mashu/CW-Contest-Logger/releases)
+[![License](https://img.shields.io/github/license/mashu/CW-Contest-Logger)](LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/mashu/CW-Contest-Logger/build.yml?branch=main)](https://github.com/mashu/CW-Contest-Logger/actions)
 
-![CW Contest Logger](screenshot.png)
+> ⚠️ **Early Development Version** - This software is under active development. Features may be incomplete and bugs are expected.
 
-## Features
+A modern, cross-platform CW contest logging application with real-time DX cluster integration, world map visualization, and ADI export capabilities.
 
-### Core Functionality
-- **Fast QSO Entry**: Optimized keyboard-driven interface for rapid contest logging
-- **Real-time Validation**: Automatic callsign and grid square validation
-- **Duplicate Checking**: Instant duplicate QSO detection with visual indicators
-- **ADI/ADIF Export**: Industry-standard log file export for QSL services
+## 📥 Download
 
-### Contest Support
-- Pre-configured contest modes (CQ WW, CQ WPX, ARRL DX, IARU HF, WAE, Field Day)
-- Automatic serial number generation
-- Real-time scoring with multiplier tracking
-- QSO rate calculations (10-minute and 60-minute rates)
-- Band-by-band statistics
+**Get the latest release:** [**Download v0.1.0**](https://github.com/mashu/CW-Contest-Logger/releases/latest)
 
-### DX Cluster & RBN Integration
-- Live DX cluster spot display
-- Reverse Beacon Network integration
-- Spot filtering by band, mode, and continent
-- Distance and bearing calculations
-- Color-coded band indicators
+- 🪟 **Windows**: Download `.exe` installer or portable version
+- 🍎 **macOS**: Download `.dmg` for Intel or Apple Silicon
+- 🐧 **Linux**: Download `.AppImage` or `.tar.gz`
 
-### World Map
-- Real-time visualization of DX spots and RBN data
-- Great circle path display
-- Interactive spot information
-- Toggle between DX, RBN, or combined view
+## ✨ Key Features
 
-### User Interface
-- Modern, professional dark/light theme
-- Responsive layout optimized for contest operation
-- Customizable window arrangement
-- Full keyboard shortcut support
+- **Fast QSO Entry** - Keyboard-optimized contest logging
+- **Real-time DX Cluster** - Live spots with RBN integration
+- **World Map Visualization** - Interactive spot mapping
+- **Contest Support** - CQ WW, ARRL DX, Field Day, and more
+- **ADI/ADIF Export** - Compatible with LoTW, eQSL, and QSL services
 
-## Installation
+## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 16+ and npm
-- Git
-
-### Setup Instructions
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd cw-contest-logger
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Build the application:
-```bash
-npm run build
-```
-
-4. Run in development mode:
-```bash
-npm run dev
-```
-
-5. Build for distribution:
-```bash
-npm run dist
-```
-
-The distributable files will be created in the `release` directory.
-
-## Usage
-
-### Quick Start
-1. Launch the application
-2. Go to Settings (gear icon) and enter your callsign and grid square
-3. Select or start a contest from Contest menu
+1. [Download](https://github.com/mashu/CW-Contest-Logger/releases/latest) and install for your platform
+2. Enter your callsign and grid square in Settings
+3. Select a contest or start general logging
 4. Begin logging QSOs!
 
-### Keyboard Shortcuts
-- **Ctrl/Cmd + Enter**: Log QSO
-- **Escape**: Clear entry form
-- **Ctrl/Cmd + D**: Toggle DX Cluster
-- **Ctrl/Cmd + M**: Toggle Map
-- **Ctrl/Cmd + E**: Export to ADI
-- **Tab**: Move between fields
+**Keyboard Shortcuts:**
+- `Ctrl/Cmd + Enter` - Log QSO
+- `Ctrl/Cmd + D` - Toggle DX Cluster
+- `Ctrl/Cmd + M` - Toggle Map
+- `Ctrl/Cmd + E` - Export to ADI
 
-### QSO Entry
-1. Enter the callsign (automatically converted to uppercase)
-2. Select band or enter frequency (band auto-detected)
-3. RST fields default to 599
-4. Serial numbers handled automatically in contest mode
-5. Press Ctrl+Enter to log
+## 📚 Documentation
 
-### Contest Operation
-1. Go to Contest → Contest Settings
-2. Select contest type
-3. Click "Start Contest"
-4. The logger will track scoring and serial numbers automatically
+- [**Installation & Setup**](docs/INSTALLATION.md)
+- [**User Guide**](docs/USER_GUIDE.md)
+- [**Development Setup**](docs/DEVELOPMENT.md)
+- [**Contributing**](CONTRIBUTING.md)
 
-### DX Cluster Features
-- **DX Tab**: Shows traditional DX cluster spots
-- **RBN Tab**: Shows CW Reverse Beacon Network spots
-- Click on any spot to populate the entry form
-- Spots show distance and bearing from your location
+## 🐛 Issues & Support
 
-### Exporting Logs
-1. File → Export to ADI
-2. Choose location and filename
-3. Upload to LoTW, eQSL, or your preferred service
+Found a bug or have a feature request? Please [open an issue](https://github.com/mashu/CW-Contest-Logger/issues).
 
-## Configuration
+## 📄 License
 
-### Settings Options
+MIT License - see [LICENSE](LICENSE) for details.
 
-#### Station Tab
-- **Callsign**: Your amateur radio callsign
-- **Grid Square**: Your Maidenhead grid locator
-- **Name**: Your name (for QSL cards)
-- **QTH**: Your location
+---
 
-#### Contest Tab
-- **Default Contest Mode**: Pre-select your preferred contest
-- **Automatic Date/Time**: Use computer clock for QSO timestamps
-- **Enable Sound Effects**: Audio feedback for actions
-
-#### Connections Tab
-- **DX Cluster URL**: Telnet URL for DX cluster
-- **RBN URL**: Telnet URL for Reverse Beacon Network
-
-#### Interface Tab
-- **Rig Interface**: CAT control selection (future feature)
-- **CW Speed**: Default sending speed in WPM
-
-## Development
-
-### Project Structure
-```
-├── src/
-│   ├── main.ts              # Main Electron process
-│   ├── preload.ts           # Preload script
-│   ├── renderer/            # React application
-│   │   ├── components/      # React components
-│   │   ├── store/          # Redux store and slices
-│   │   ├── services/       # External services
-│   │   ├── utils/          # Utility functions
-│   │   └── index.tsx       # Renderer entry point
-├── dist/                    # Compiled output
-├── release/                 # Distribution packages
-├── package.json
-├── tsconfig.json
-└── webpack.config.js
-```
-
-### Technology Stack
-- **Electron**: Cross-platform desktop framework
-- **React**: UI library
-- **TypeScript**: Type safety
-- **Redux Toolkit**: State management
-- **Material-UI**: Component library
-- **Leaflet**: Map visualization
-- **Recharts**: Statistics charts
-
-### Building from Source
-
-#### Development Build
-```bash
-npm run dev
-```
-
-#### Production Build
-```bash
-npm run build
-npm start
-```
-
-#### Create Distributables
-```bash
-# Windows
-npm run dist -- --win
-
-# macOS
-npm run dist -- --mac
-
-# Linux
-npm run dist -- --linux
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **DX Cluster not connecting**
-   - Check your internet connection
-   - Verify the telnet URL in settings
-   - Some clusters require callsign authentication
-
-2. **Map not displaying**
-   - Ensure you have an active internet connection
-   - Check if your grid square is correctly formatted
-
-3. **ADI export fails**
-   - Ensure you have write permissions to the selected directory
-   - Check that no other program is using the file
-
-### Debug Mode
-Run with Chrome DevTools:
-```bash
-npm run dev
-```
-Then press `Ctrl+Shift+I` (or `Cmd+Option+I` on macOS) in the app.
-
-## Future Enhancements
-
-- [ ] CAT control for automatic frequency/mode updates
-- [ ] CW keyer integration
-- [ ] WSJT-X integration for digital modes
-- [ ] Cloud backup and sync
-- [ ] iOS/Android companion apps
-- [ ] Contest rule validation
-- [ ] Automatic QRZ.com lookups
-- [ ] Propagation predictions
-- [ ] Multi-operator support
-
-## Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Inspired by N1MM Logger+, cqrlog, and HAMRS
-- DX cluster data format specifications from AR-Cluster
-- ADIF specifications from adif.org
-
-## Support
-
-For bug reports and feature requests, please use the GitHub issue tracker.
-
-73 and good DX!
+**73 and good DX!** 📻
