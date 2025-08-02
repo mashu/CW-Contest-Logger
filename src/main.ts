@@ -23,7 +23,7 @@ function createWindow() {
     frame: process.platform !== 'darwin'
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
