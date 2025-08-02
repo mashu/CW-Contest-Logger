@@ -1,0 +1,69 @@
+{
+  "name": "cw-contest-logger",
+  "version": "1.0.0",
+  "description": "Professional CW Contest Logger with ADI Export",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "npm run build && electron .",
+    "dev": "concurrently \"npm run watch\" \"wait-on dist/main.js && electron .\"",
+    "build": "tsc && webpack",
+    "watch": "concurrently \"tsc -w\" \"webpack --watch\"",
+    "dist": "npm run build && electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": ["ham-radio", "contest-logger", "cw", "adi"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/leaflet": "^1.9.3",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "concurrently": "^8.0.0",
+    "electron": "^27.0.0",
+    "electron-builder": "^24.0.0",
+    "ts-loader": "^9.4.0",
+    "typescript": "^5.0.0",
+    "wait-on": "^7.0.0",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.0",
+    "@mui/material": "^5.14.0",
+    "@mui/x-data-grid": "^6.10.0",
+    "@reduxjs/toolkit": "^1.9.5",
+    "axios": "^1.4.0",
+    "date-fns": "^2.30.0",
+    "electron-store": "^8.1.0",
+    "leaflet": "^1.9.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-leaflet": "^4.2.1",
+    "react-redux": "^8.1.0",
+    "recharts": "^2.7.0",
+    "uuid": "^9.0.0"
+  },
+  "build": {
+    "appId": "com.yourcompany.cwcontestlogger",
+    "productName": "CW Contest Logger",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
