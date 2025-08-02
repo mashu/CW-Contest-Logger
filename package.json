@@ -9,6 +9,10 @@
     "build": "tsc && webpack",
     "watch": "concurrently \"tsc -w\" \"webpack --watch\"",
     "dist": "npm run build && electron-builder",
+    "dist:all": "npm run build && electron-builder --publish=never --win --mac --linux",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:linux": "npm run build && electron-builder --linux",
     "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
@@ -64,14 +68,42 @@
       "dist/**/*",
       "node_modules/**/*"
     ],
+    "compression": "maximum",
     "mac": {
-      "category": "public.app-category.utilities"
+      "category": "public.app-category.utilities",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        },
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
     },
     "linux": {
-      "target": "AppImage"
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "tar.gz",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "CW-Contest-Logger-${version}-portable.exe"
     }
   }
 }
