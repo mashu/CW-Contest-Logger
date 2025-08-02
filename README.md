@@ -11,7 +11,7 @@ A modern, cross-platform CW contest logging application with real-time DX cluste
 
 ## 📥 Download
 
-**Get the latest release:** [**Download v0.1.0**](https://github.com/mashu/CW-Contest-Logger/releases/latest)
+**Get the latest release:** [**Download v0.1.1**](https://github.com/mashu/CW-Contest-Logger/releases/latest)
 
 - 🪟 **Windows**: Download `.exe` installer or portable version
 - 🍎 **macOS**: Download `.dmg` for Intel or Apple Silicon
