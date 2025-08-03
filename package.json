@@ -1,13 +1,13 @@
 {
   "name": "cw-contest-logger",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Professional CW Contest Logger with ADI Export",
   "main": "dist/main.js",
   "scripts": {
     "start": "npm run build && electron .",
     "dev": "concurrently \"npm run watch\" \"wait-on dist/main.js && electron .\"",
     "build": "tsc && webpack",
-    "build:prod": "NODE_ENV=production tsc && NODE_ENV=production webpack",
+    "build:prod": "cross-env NODE_ENV=production tsc && cross-env NODE_ENV=production webpack",
     "watch": "concurrently \"tsc -w\" \"webpack --watch\"",
     "dist": "npm run build:prod && electron-builder",
     "dist:all": "npm run build:prod && electron-builder --publish=never --win --mac --linux",
@@ -31,6 +31,7 @@
     "@types/react-dom": "^18.2.0",
     "@types/uuid": "^10.0.0",
     "concurrently": "^8.0.0",
+    "cross-env": "^10.0.0",
     "css-loader": "^7.1.2",
     "electron": "^27.0.0",
     "electron-builder": "^24.0.0",
