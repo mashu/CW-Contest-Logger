@@ -108,6 +108,13 @@ function createMenu() {
             mainWindow?.webContents.send('menu-toggle-map');
           }
         },
+        {
+          label: 'Toggle Propagation',
+          accelerator: 'CmdOrCtrl+P',
+          click: () => {
+            mainWindow?.webContents.send('menu-toggle-propagation');
+          }
+        },
         { type: 'separator' },
         { role: 'reload' },
         { role: 'toggleDevTools' },
@@ -212,6 +219,7 @@ function generateADI(qsos: any[]): string {
     adi += `<RST_RCVD:3>${qso.rstRcvd}`;
     if (qso.serialSent) adi += `<STX:${qso.serialSent.length}>${qso.serialSent}`;
     if (qso.serialRcvd) adi += `<SRX:${qso.serialRcvd.length}>${qso.serialRcvd}`;
+    if (qso.myGridSquare) adi += `<MY_GRIDSQUARE:${qso.myGridSquare.length}>${qso.myGridSquare}`;
     if (qso.gridSquare) adi += `<GRIDSQUARE:${qso.gridSquare.length}>${qso.gridSquare}`;
     if (qso.comment) adi += `<COMMENT:${qso.comment.length}>${qso.comment}`;
     adi += '<EOR>\n\n';
@@ -260,6 +268,198 @@ ipcMain.handle('open-log-location', async () => {
   } catch (error) {
     console.error('Error opening log location:', error);
     return { success: false, error: 'Failed to open log location' };
+  }
+});
+
+// QRZ.com lookup with session management
+let qrzSessionKey: string | null = null;
+let qrzSessionExpiry: number = 0;
+
+ipcMain.handle('qrz-lookup', async (event, callsign: string, username?: string, password?: string) => {
+  try {
+    // Check if we have a valid session
+    if (!qrzSessionKey || Date.now() > qrzSessionExpiry) {
+      if (!username || !password) {
+        return { success: false, error: 'QRZ credentials required for first lookup' };
+      }
+      
+      // Get new session key
+      const sessionResult = await getQRZSession(username, password);
+      if (!sessionResult.success) {
+        return sessionResult;
+      }
+      qrzSessionKey = sessionResult.sessionKey;
+      qrzSessionExpiry = Date.now() + (23 * 60 * 60 * 1000); // 23 hours
+    }
+    
+    // Lookup callsign with session key
+    if (!qrzSessionKey) {
+      return { success: false, error: 'No valid session available' };
+    }
+    const lookupResult = await lookupQRZCallsign(callsign, qrzSessionKey);
+    return lookupResult;
+    
+  } catch (error) {
+    console.error('QRZ lookup error:', error);
+    return { success: false, error: 'QRZ lookup failed' };
+  }
+});
+
+async function getQRZSession(username: string, password: string): Promise<any> {
+  try {
+    const response = await fetch(`https://xmldata.qrz.com/xml/current/?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&agent=ContestLogger/1.0`);
+    
+    if (!response.ok) {
+      return { success: false, error: 'QRZ server error' };
+    }
+    
+    const xmlText = await response.text();
+    
+    // Parse session key from XML
+    const keyMatch = xmlText.match(/<Key>([^<]+)<\/Key>/);
+    const errorMatch = xmlText.match(/<Error>([^<]+)<\/Error>/);
+    
+    if (errorMatch) {
+      return { success: false, error: errorMatch[1] };
+    }
+    
+    if (keyMatch) {
+      return { success: true, sessionKey: keyMatch[1] };
+    }
+    
+    return { success: false, error: 'Failed to get session key' };
+    
+  } catch (error) {
+    console.error('QRZ session error:', error);
+    return { success: false, error: 'Network error during QRZ login' };
+  }
+}
+
+async function lookupQRZCallsign(callsign: string, sessionKey: string): Promise<any> {
+  try {
+    const response = await fetch(`https://xmldata.qrz.com/xml/current/?s=${sessionKey}&callsign=${encodeURIComponent(callsign)}`);
+    
+    if (!response.ok) {
+      return { success: false, error: 'QRZ server error' };
+    }
+    
+    const xmlText = await response.text();
+    
+    // Parse callsign data from XML
+    const errorMatch = xmlText.match(/<Error>([^<]+)<\/Error>/);
+    if (errorMatch) {
+      return { success: false, error: errorMatch[1] };
+    }
+    
+    // Extract key fields
+    const getXMLValue = (tag: string) => {
+      const regex = new RegExp(`<${tag}>([^<]*)</${tag}>`, 'i');
+      const match = xmlText.match(regex);
+      return match ? match[1] : null;
+    };
+    
+    const callData = {
+      call: getXMLValue('call'),
+      fname: getXMLValue('fname'),
+      name: getXMLValue('name'),
+      addr1: getXMLValue('addr1'),
+      addr2: getXMLValue('addr2'),
+      state: getXMLValue('state'),
+      country: getXMLValue('country'),
+      grid: getXMLValue('grid'),
+      cqzone: getXMLValue('cqzone'),
+      ituzone: getXMLValue('ituzone'),
+      email: getXMLValue('email'),
+      lat: getXMLValue('lat'),
+      lon: getXMLValue('lon')
+    };
+    
+    // Check if we got valid data
+    if (callData.call) {
+      console.log('QRZ lookup result for', callsign, ':', {
+        call: callData.call,
+        name: `${callData.fname || ''} ${callData.name || ''}`.trim(),
+        grid: callData.grid,
+        country: callData.country,
+        addr2: callData.addr2
+      });
+      return { success: true, data: callData };
+    } else {
+      return { success: false, error: `No data found for ${callsign}` };
+    }
+    
+  } catch (error) {
+    console.error('QRZ callsign lookup error:', error);
+    return { success: false, error: 'Network error during callsign lookup' };
+  }
+}
+
+// Solar data fetching (no CSP restrictions in main process)
+ipcMain.handle('fetch-solar-data', async () => {
+  try {
+    const promises = [
+      fetch('https://services.swpc.noaa.gov/json/f107_cm_flux.json').then(r => r.json()),
+      fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json').then(r => r.json()),
+      fetch('https://services.swpc.noaa.gov/json/sunspot_report.json').then(r => r.json())
+    ];
+
+    const [f107Data, kIndexData, sunspotData] = await Promise.all(promises);
+    
+    // Extract the latest values
+    const sfi = f107Data?.[0]?.f107 || null;
+    const kIndex = kIndexData?.[0]?.kp_index || null;
+    const aIndex = kIndexData?.[0]?.estimated_kp || null;
+    const sunspotNumber = sunspotData?.sunspot_number || null;
+
+    return {
+      success: true,
+      data: {
+        sfi: sfi ? parseFloat(sfi) : null,
+        kIndex: kIndex ? parseFloat(kIndex) : null,
+        aIndex: aIndex ? parseFloat(aIndex) : null,
+        sunspotNumber: sunspotNumber ? parseInt(sunspotNumber) : null,
+        source: 'NOAA'
+      }
+    };
+  } catch (noaaError: any) {
+    console.log('NOAA failed, trying HamQSL:', noaaError.message);
+    
+    // Fallback to HamQSL
+    try {
+      const response = await fetch('https://www.hamqsl.com/solarxml.php');
+      const xmlText = await response.text();
+      
+      const parseXMLValue = (tag: string): string | null => {
+        const regex = new RegExp(`<${tag}>([^<]*)</${tag}>`, 'i');
+        const match = xmlText.match(regex);
+        return match ? match[1] : null;
+      };
+
+      return {
+        success: true,
+        data: {
+          sfi: parseFloat(parseXMLValue('solarflux') || '150'),
+          kIndex: parseFloat(parseXMLValue('kindex') || '2'),
+          aIndex: parseFloat(parseXMLValue('aindex') || '15'),
+          sunspotNumber: parseInt(parseXMLValue('sunspots') || '50'),
+          source: 'HamQSL'
+        }
+      };
+    } catch (hamQslError: any) {
+      console.log('HamQSL also failed:', hamQslError.message);
+      
+      // Return estimated values
+      return {
+        success: false,
+        data: {
+          sfi: 150,
+          kIndex: 2,
+          aIndex: 15,
+          sunspotNumber: 50,
+          source: 'Estimated'
+        }
+      };
+    }
   }
 });
 
@@ -314,6 +514,9 @@ function parseADI(content: string): any[] {
           break;
         case 'srx':
           qso.serialRcvd = fieldValue;
+          break;
+        case 'my_gridsquare':
+          qso.myGridSquare = fieldValue;
           break;
         case 'gridsquare':
           qso.gridSquare = fieldValue;

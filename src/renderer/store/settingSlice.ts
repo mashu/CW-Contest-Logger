@@ -14,7 +14,8 @@ export interface Settings {
   rigInterface: string;
   theme: 'light' | 'dark';
   duplicateCheck: boolean;
-  qrzApiKey?: string;
+  qrzUsername?: string;
+  qrzPassword?: string;
 }
 
 interface SettingsState {
@@ -37,7 +38,8 @@ const initialState: SettingsState = {
     rigInterface: 'none',
     theme: 'dark',
     duplicateCheck: true,
-    qrzApiKey: '',
+    qrzUsername: '',
+    qrzPassword: '',
   },
   isLoading: false,
 };

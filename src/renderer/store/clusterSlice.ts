@@ -35,6 +35,7 @@ interface ClusterState {
   showDXCluster: boolean;
   showRBN: boolean;
   showMap: boolean;
+  showPropagation: boolean;
   filters: {
     bands: string[];
     modes: string[];
@@ -51,6 +52,7 @@ const initialState: ClusterState = {
   showDXCluster: true,
   showRBN: true,
   showMap: true,
+  showPropagation: true,
   filters: {
     bands: ['160m', '80m', '40m', '20m', '15m', '10m'],
     modes: ['CW', 'SSB', 'RTTY'],
@@ -94,6 +96,9 @@ const clusterSlice = createSlice({
     toggleMap: (state) => {
       state.showMap = !state.showMap;
     },
+    togglePropagation: (state) => {
+      state.showPropagation = !state.showPropagation;
+    },
     updateFilters: (state, action: PayloadAction<Partial<ClusterState['filters']>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
@@ -109,6 +114,7 @@ export const {
   toggleDXCluster,
   toggleRBN,
   toggleMap,
+  togglePropagation,
   updateFilters,
 } = clusterSlice.actions;
 

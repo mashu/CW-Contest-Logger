@@ -101,14 +101,14 @@ const DXCluster: React.FC = () => {
           </Box>
         }
         secondary={
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">
+          <span style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+            <span style={{ fontSize: '0.75rem', color: 'text.secondary' }}>
               {type === 'dx' ? spot.comment : `${spot.speed} WPM`}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            </span>
+            <span style={{ fontSize: '0.75rem', color: 'text.secondary' }}>
               {format(new Date(spot.time), 'HH:mm:ss')} by {spot.spotter}
-            </Typography>
-          </Box>
+            </span>
+          </span>
         }
       />
     </ListItem>

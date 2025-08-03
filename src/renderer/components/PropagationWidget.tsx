@@ -66,46 +66,21 @@ const PropagationWidget: React.FC = () => {
     }
   };
 
-  const fetchSolarData = async () => {
+  const fetchSolarData = async (): Promise<any> => {
     try {
-      // Primary source: NOAA Space Weather Prediction Center - correct endpoints
-      const [solarFluxData, kIndexData, sunspotData] = await Promise.all([
-        fetch('https://services.swpc.noaa.gov/json/f107_cm_flux.json'),
-        fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json'),
-        fetch('https://services.swpc.noaa.gov/json/sunspot_report.json')
-      ]);
-      
-      if (solarFluxData.ok && kIndexData.ok) {
-        const solarFlux = await solarFluxData.json();
-        const kIndex = await kIndexData.json();
-        const sunspots = sunspotData.ok ? await sunspotData.json() : null;
-        
-        return parseNOAADataCombined(solarFlux, kIndex, sunspots);
-      }
+      const result = await window.electronAPI.fetchSolarData();
+      console.log('Solar data from main process:', result);
+      return result.data;
     } catch (error) {
-      console.warn('NOAA sources failed, trying alternative:', error);
+      console.error('Failed to fetch solar data:', error);
+      return {
+        sfi: 150,
+        kIndex: 2,
+        aIndex: 15,
+        sunspotNumber: 50,
+        source: 'Fallback'
+      };
     }
-
-    try {
-      // Fallback source: HamQSL space weather API
-      const hamqslResponse = await fetch('https://www.hamqsl.com/solarxml.php');
-      if (hamqslResponse.ok) {
-        const xmlText = await hamqslResponse.text();
-        return parseHamQSLData(xmlText);
-      }
-    } catch (error) {
-      console.warn('HamQSL source failed:', error);
-    }
-
-    // Final fallback: Use basic estimated values
-    console.warn('All solar data sources failed, using estimates');
-    return {
-      sfi: 85,
-      sunspotNumber: 10,
-      aIndex: 15,
-      kIndex: 2,
-      solarFluxTrend: 'stable'
-    };
   };
 
   const parseNOAADataCombined = (solarFluxData: any[], kIndexData: any[], sunspotData: any[] | null) => {

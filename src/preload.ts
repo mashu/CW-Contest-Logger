@@ -6,8 +6,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   exportADI: (qsos: any[]) => ipcRenderer.invoke('export-adi', qsos),
   importADI: () => ipcRenderer.invoke('import-adi'),
   openLogLocation: () => ipcRenderer.invoke('open-log-location'),
+  qrzLookup: (callsign: string, username?: string, password?: string) => ipcRenderer.invoke('qrz-lookup', callsign, username, password),
   saveQSOs: (qsos: any[]) => ipcRenderer.invoke('save-qsos', qsos),
   getQSOs: () => ipcRenderer.invoke('get-qsos'),
+  fetchSolarData: () => ipcRenderer.invoke('fetch-solar-data'),
   
   onMenuAction: (callback: (action: string) => void) => {
     const channels = [
@@ -17,6 +19,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'menu-export-adi',
       'menu-toggle-dx-cluster',
       'menu-toggle-map',
+      'menu-toggle-propagation',
       'menu-start-contest',
       'menu-end-contest',
       'menu-contest-settings'

@@ -23,9 +23,11 @@ declare global {
       exportADI: (qsos: any[]) => Promise<any>;
       importADI: () => Promise<any>;
       openLogLocation: () => Promise<any>;
+      qrzLookup: (callsign: string, username?: string, password?: string) => Promise<any>;
       saveQSOs: (qsos: any[]) => Promise<any>;
       getQSOs: () => Promise<any>;
       onMenuAction: (callback: (action: string) => void) => void;
+      fetchSolarData: () => Promise<any>;
     };
   }
 }
@@ -35,6 +37,7 @@ function App() {
   const theme = useSelector((state: RootState) => state.settings.settings.theme);
   const showMap = useSelector((state: RootState) => state.cluster.showMap);
   const showDXCluster = useSelector((state: RootState) => state.cluster.showDXCluster);
+  const showPropagation = useSelector((state: RootState) => state.cluster.showPropagation);
   const qsos = useSelector((state: RootState) => state.qsos.qsos);
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
@@ -61,6 +64,9 @@ function App() {
           break;
         case 'menu-toggle-map':
           dispatch({ type: 'cluster/toggleMap' });
+          break;
+        case 'menu-toggle-propagation':
+          dispatch({ type: 'cluster/togglePropagation' });
           break;
         case 'menu-contest-settings':
           setContestOpen(true);
@@ -183,21 +189,71 @@ function App() {
           </Box>
 
           {/* Right Sidebar */}
-          {(showDXCluster || showMap) && (
+          {(showDXCluster || showMap || showPropagation) && (
             <Box sx={{ width: 400, display: 'flex', flexDirection: 'column', p: 2 }}>
               {/* Propagation Widget */}
-              <PropagationWidget />
+              {showPropagation && (
+                <Box sx={{ mb: (showMap || showDXCluster) ? 2 : 0 }}>
+                  <PropagationWidget />
+                </Box>
+              )}
               
-              {showMap && (
-                <Box sx={{ height: showDXCluster ? '40%' : '60%', mb: showDXCluster ? 2 : 0 }}>
-                  <WorldMap />
-                </Box>
-              )}
-              {showDXCluster && (
-                <Box sx={{ height: showMap ? '40%' : '60%' }}>
-                  <DXCluster />
-                </Box>
-              )}
+              {/* Calculate heights based on visible components */}
+              {(() => {
+                const visibleCount = [showPropagation, showMap, showDXCluster].filter(Boolean).length;
+                const remainingComponents = [showMap, showDXCluster].filter(Boolean).length;
+                
+                // Heights when propagation is visible
+                if (showPropagation && remainingComponents === 2) {
+                  // All three visible: propagation takes ~40%, map and dx get 30% each
+                  return (
+                    <>
+                      {showMap && (
+                        <Box sx={{ height: '30%', mb: showDXCluster ? 2 : 0 }}>
+                          <WorldMap />
+                        </Box>
+                      )}
+                      {showDXCluster && (
+                        <Box sx={{ height: '30%' }}>
+                          <DXCluster />
+                        </Box>
+                      )}
+                    </>
+                  );
+                } else if (showPropagation && remainingComponents === 1) {
+                  // Propagation + one other: other gets ~60%
+                  return (
+                    <>
+                      {showMap && (
+                        <Box sx={{ height: '60%' }}>
+                          <WorldMap />
+                        </Box>
+                      )}
+                      {showDXCluster && (
+                        <Box sx={{ height: '60%' }}>
+                          <DXCluster />
+                        </Box>
+                      )}
+                    </>
+                  );
+                } else {
+                  // No propagation widget, original layout
+                  return (
+                    <>
+                      {showMap && (
+                        <Box sx={{ height: showDXCluster ? '50%' : '100%', mb: showDXCluster ? 2 : 0 }}>
+                          <WorldMap />
+                        </Box>
+                      )}
+                      {showDXCluster && (
+                        <Box sx={{ height: showMap ? '50%' : '100%' }}>
+                          <DXCluster />
+                        </Box>
+                      )}
+                    </>
+                  );
+                }
+              })()}
             </Box>
           )}
         </Box>

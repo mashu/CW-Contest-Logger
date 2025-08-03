@@ -114,14 +114,23 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
                 onChange={(e) => handleChange('qth', e.target.value)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="QRZ.com API Key (Optional)"
-                value={localSettings.qrzApiKey || ''}
-                onChange={(e) => handleChange('qrzApiKey', e.target.value)}
-                helperText="Enter your QRZ.com API key for automatic callsign lookups. Get yours at https://www.qrz.com/page/current_spec.html"
+                label="QRZ.com Username"
+                value={localSettings.qrzUsername || ''}
+                onChange={(e) => handleChange('qrzUsername', e.target.value)}
+                helperText="Your QRZ.com login username for automatic callsign lookups"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="QRZ.com Password"
+                value={localSettings.qrzPassword || ''}
+                onChange={(e) => handleChange('qrzPassword', e.target.value)}
                 type="password"
+                helperText="Your QRZ.com password (stored securely locally)"
               />
             </Grid>
           </Grid>

@@ -72,32 +72,54 @@ const EntryForm: React.FC = () => {
     
     setQrzLoading(true);
     try {
-      // Use QRZ.com API via a proxy service to avoid CORS issues
-      // In production, you'd want to proxy this through your backend
-      const response = await fetch(`https://api.qrz.com/xml/current/?s=${settings.qrzApiKey || ''}&callsign=${callsign}`, {
-        method: 'GET'
-      });
+      // Try lookup with stored credentials
+      let result = await window.electronAPI.qrzLookup(callsign);
       
-      if (response.ok) {
-        const data = await response.text();
-        const qrzInfo = parseQRZResponse(data);
+      // If credentials are needed, try with QRZ username/password
+      if (!result.success && result.error?.includes('credentials') && settings.qrzUsername && settings.qrzPassword) {
+        result = await window.electronAPI.qrzLookup(callsign, settings.qrzUsername, settings.qrzPassword);
+      }
+      
+      if (result.success && result.data) {
+        const qrzInfo = {
+          call: result.data.call,
+          name: result.data.fname ? `${result.data.fname} ${result.data.name || ''}`.trim() : result.data.name,
+          addr2: result.data.addr2,
+          state: result.data.state,
+          country: result.data.country,
+          grid: result.data.grid,
+          cqzone: result.data.cqzone,
+          ituzone: result.data.ituzone,
+          email: result.data.email
+        };
+        
+        console.log('QRZ Info processed:', qrzInfo);
         setQrzData(qrzInfo);
         
-        // Auto-fill grid square if available
-        if (qrzInfo && qrzInfo.grid && !currentQSO.gridSquare) {
-          dispatch(updateCurrentQSO({ gridSquare: qrzInfo.grid }));
+        // Auto-fill DX grid square if available and not already filled
+        if (qrzInfo.grid && qrzInfo.grid.trim() !== '' && !currentQSO.gridSquare) {
+          console.log('Auto-filling DX grid:', qrzInfo.grid);
+          dispatch(updateCurrentQSO({ gridSquare: qrzInfo.grid.trim() }));
+        } else {
+          console.log('Grid square not auto-filled:', {
+            hasGrid: !!qrzInfo.grid,
+            gridValue: qrzInfo.grid,
+            currentDxGrid: currentQSO.gridSquare,
+            reason: !qrzInfo.grid ? 'No grid from QRZ' : currentQSO.gridSquare ? 'Field already filled' : 'Unknown'
+          });
         }
+      } else {
+        // Show error or fallback to demo data for testing
+        setQrzData({
+          error: result.error || 'Lookup failed',
+          message: 'Add QRZ username & password in Settings for real lookups'
+        });
       }
     } catch (error) {
       console.error('QRZ lookup failed:', error);
-      // Fallback to mock data for demo
       setQrzData({
-        name: 'Demo User',
-        addr2: 'Demo City, Demo State',
-        country: 'Demo Country',
-        grid: 'FN20',
-        cqzone: '5',
-        ituzone: '8'
+        error: 'Lookup failed',
+        message: 'Check your internet connection and QRZ credentials'
       });
     } finally {
       setQrzLoading(false);
@@ -176,6 +198,8 @@ const EntryForm: React.FC = () => {
       serialRcvd: '',
       gridSquare: '',
       comment: '',
+      // Keep myGridSquare from settings
+      myGridSquare: settings.gridSquare || '',
     }));
     callInputRef.current?.focus();
   };
@@ -195,6 +219,8 @@ const EntryForm: React.FC = () => {
       serialRcvd: '',
       gridSquare: '',
       comment: '',
+      // Keep myGridSquare from settings
+      myGridSquare: settings.gridSquare || '',
     }));
     callInputRef.current?.focus();
   };
@@ -280,11 +306,21 @@ const EntryForm: React.FC = () => {
         )}
 
         <TextField
-          label="Grid Square"
+          label="My Grid"
+          value={currentQSO.myGridSquare || settings.gridSquare || ''}
+          onChange={(e) => handleFieldChange('myGridSquare', e.target.value.toUpperCase())}
+          size="small"
+          sx={{ width: 100 }}
+          placeholder={settings.gridSquare || 'Your grid'}
+        />
+
+        <TextField
+          label="DX Grid"
           value={currentQSO.gridSquare || ''}
           onChange={(e) => handleFieldChange('gridSquare', e.target.value.toUpperCase())}
           size="small"
           sx={{ width: 100 }}
+          placeholder="Their grid"
         />
 
         <TextField
@@ -330,31 +366,48 @@ const EntryForm: React.FC = () => {
               </Box>
               {qrzData && !qrzLoading && (
                 <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2">
-                    <strong>{currentQSO.call}</strong>
-                    {qrzData.name && ` - ${qrzData.name}`}
-                  </Typography>
-                  {qrzData.addr2 && (
-                    <Typography variant="body2" color="text.secondary">
-                      📍 {qrzData.addr2}
-                    </Typography>
+                  {qrzData.error ? (
+                    <Box>
+                      <Typography variant="body2" color="error">
+                        ⚠️ {qrzData.error}
+                      </Typography>
+                      {qrzData.message && (
+                        <Typography variant="caption" color="text.secondary">
+                          {qrzData.message}
+                        </Typography>
+                      )}
+                    </Box>
+                  ) : (
+                    <Box>
+                      <Typography variant="body2">
+                        <strong>{qrzData.call || currentQSO.call}</strong>
+                        {qrzData.name && ` - ${qrzData.name}`}
+                      </Typography>
+                      {qrzData.addr2 && (
+                        <Typography variant="body2" color="text.secondary">
+                          📍 {qrzData.addr2}{qrzData.state && `, ${qrzData.state}`}
+                        </Typography>
+                      )}
+                      {qrzData.country && (
+                        <Typography variant="body2" color="text.secondary">
+                          🌍 {qrzData.country}
+                        </Typography>
+                      )}
+                      <Box sx={{ display: 'flex', gap: 2, mt: 0.5, flexWrap: 'wrap' }}>
+                        {qrzData.grid ? (
+                          <Chip label={`Grid: ${qrzData.grid}`} size="small" variant="outlined" color="primary" />
+                        ) : (
+                          <Chip label="Grid: N/A" size="small" variant="outlined" color="default" />
+                        )}
+                        {qrzData.cqzone && (
+                          <Chip label={`CQ: ${qrzData.cqzone}`} size="small" variant="outlined" />
+                        )}
+                        {qrzData.ituzone && (
+                          <Chip label={`ITU: ${qrzData.ituzone}`} size="small" variant="outlined" />
+                        )}
+                      </Box>
+                    </Box>
                   )}
-                  {qrzData.country && (
-                    <Typography variant="body2" color="text.secondary">
-                      🌍 {qrzData.country}
-                    </Typography>
-                  )}
-                  <Box sx={{ display: 'flex', gap: 2, mt: 0.5 }}>
-                    {qrzData.grid && (
-                      <Chip label={`Grid: ${qrzData.grid}`} size="small" variant="outlined" />
-                    )}
-                    {qrzData.cqzone && (
-                      <Chip label={`CQ: ${qrzData.cqzone}`} size="small" variant="outlined" />
-                    )}
-                    {qrzData.ituzone && (
-                      <Chip label={`ITU: ${qrzData.ituzone}`} size="small" variant="outlined" />
-                    )}
-                  </Box>
                 </Box>
               )}
             </CardContent>
