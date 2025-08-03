@@ -243,18 +243,18 @@ const EntryForm: React.FC = () => {
         )}
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }} onKeyDown={handleKeyDown}>
+      <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5, md: 2 }, flexWrap: 'wrap' }} onKeyDown={handleKeyDown}>
         <TextField
           inputRef={callInputRef}
           label="Call Sign"
           value={currentQSO.call || ''}
           onChange={(e) => handleFieldChange('call', e.target.value.toUpperCase())}
           size="small"
-          sx={{ minWidth: 120 }}
+          sx={{ minWidth: { xs: 100, sm: 120 } }}
           inputProps={{ style: { textTransform: 'uppercase' } }}
         />
 
-        <FormControl size="small" sx={{ minWidth: 80 }}>
+        <FormControl size="small" sx={{ minWidth: { xs: 70, sm: 80 } }}>
           <InputLabel>Band</InputLabel>
           <Select
             value={currentQSO.band || ''}
@@ -274,7 +274,7 @@ const EntryForm: React.FC = () => {
           value={currentQSO.frequency || ''}
           onChange={(e) => handleFieldChange('frequency', parseFloat(e.target.value))}
           size="small"
-          sx={{ width: 100 }}
+          sx={{ width: { xs: 80, sm: 100 } }}
           type="number"
           inputProps={{ step: 0.001 }}
         />
@@ -284,7 +284,7 @@ const EntryForm: React.FC = () => {
           value={currentQSO.rstSent || '599'}
           onChange={(e) => handleFieldChange('rstSent', e.target.value)}
           size="small"
-          sx={{ width: 80 }}
+          sx={{ width: { xs: 70, sm: 80 } }}
         />
 
         <TextField
@@ -292,7 +292,7 @@ const EntryForm: React.FC = () => {
           value={currentQSO.rstRcvd || '599'}
           onChange={(e) => handleFieldChange('rstRcvd', e.target.value)}
           size="small"
-          sx={{ width: 80 }}
+          sx={{ width: { xs: 70, sm: 80 } }}
         />
 
         {contest.isActive && (
@@ -301,7 +301,7 @@ const EntryForm: React.FC = () => {
             value={currentQSO.serialRcvd || ''}
             onChange={(e) => handleFieldChange('serialRcvd', e.target.value)}
             size="small"
-            sx={{ width: 100 }}
+            sx={{ width: { xs: 80, sm: 100 } }}
           />
         )}
 
@@ -310,7 +310,7 @@ const EntryForm: React.FC = () => {
           value={currentQSO.myGridSquare || settings.gridSquare || ''}
           onChange={(e) => handleFieldChange('myGridSquare', e.target.value.toUpperCase())}
           size="small"
-          sx={{ width: 100 }}
+          sx={{ width: { xs: 80, sm: 100 } }}
           placeholder={settings.gridSquare || 'Your grid'}
         />
 
@@ -319,7 +319,7 @@ const EntryForm: React.FC = () => {
           value={currentQSO.gridSquare || ''}
           onChange={(e) => handleFieldChange('gridSquare', e.target.value.toUpperCase())}
           size="small"
-          sx={{ width: 100 }}
+          sx={{ width: { xs: 80, sm: 100 } }}
           placeholder="Their grid"
         />
 
@@ -329,7 +329,7 @@ const EntryForm: React.FC = () => {
           onChange={(e) => handleFieldChange('date', e.target.value)}
           size="small"
           type="date"
-          sx={{ width: 140 }}
+          sx={{ width: { xs: 120, sm: 140 } }}
           disabled={settings.autoTime}
         />
 
@@ -339,7 +339,7 @@ const EntryForm: React.FC = () => {
           onChange={(e) => handleFieldChange('time', e.target.value)}
           size="small"
           type="time"
-          sx={{ width: 100 }}
+          sx={{ width: { xs: 90, sm: 100 } }}
           disabled={settings.autoTime}
         />
 
@@ -348,7 +348,7 @@ const EntryForm: React.FC = () => {
           value={currentQSO.comment || ''}
           onChange={(e) => handleFieldChange('comment', e.target.value)}
           size="small"
-          sx={{ minWidth: 150 }}
+          sx={{ minWidth: { xs: 120, sm: 150 } }}
         />
       </Box>
 

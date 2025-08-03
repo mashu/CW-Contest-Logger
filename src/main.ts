@@ -116,6 +116,28 @@ function createMenu() {
           }
         },
         { type: 'separator' },
+        {
+          label: 'Contest Settings',
+          accelerator: 'CmdOrCtrl+Shift+C',
+          click: () => {
+            mainWindow?.webContents.send('menu-contest-settings');
+          }
+        },
+        {
+          label: 'Start Contest',
+          accelerator: 'CmdOrCtrl+Shift+S',
+          click: () => {
+            mainWindow?.webContents.send('menu-start-contest');
+          }
+        },
+        {
+          label: 'End Contest',
+          accelerator: 'CmdOrCtrl+Shift+E',
+          click: () => {
+            mainWindow?.webContents.send('menu-end-contest');
+          }
+        },
+        { type: 'separator' },
         { role: 'reload' },
         { role: 'toggleDevTools' },
         { type: 'separator' },
@@ -124,30 +146,6 @@ function createMenu() {
         { role: 'zoomOut' },
         { type: 'separator' },
         { role: 'togglefullscreen' }
-      ]
-    },
-    {
-      label: 'Contest',
-      submenu: [
-        {
-          label: 'Start Contest',
-          click: () => {
-            mainWindow?.webContents.send('menu-start-contest');
-          }
-        },
-        {
-          label: 'End Contest',
-          click: () => {
-            mainWindow?.webContents.send('menu-end-contest');
-          }
-        },
-        { type: 'separator' },
-        {
-          label: 'Contest Settings',
-          click: () => {
-            mainWindow?.webContents.send('menu-contest-settings');
-          }
-        }
       ]
     }
   ];
@@ -345,6 +343,11 @@ async function lookupQRZCallsign(callsign: string, sessionKey: string): Promise<
     
     const xmlText = await response.text();
     
+    // Debug: Log the raw XML response
+    console.log(`\n=== QRZ XML Response for ${callsign} ===`);
+    console.log(xmlText);
+    console.log('=== End XML Response ===\n');
+    
     // Parse callsign data from XML
     const errorMatch = xmlText.match(/<Error>([^<]+)<\/Error>/);
     if (errorMatch) {
@@ -366,7 +369,7 @@ async function lookupQRZCallsign(callsign: string, sessionKey: string): Promise<
       addr2: getXMLValue('addr2'),
       state: getXMLValue('state'),
       country: getXMLValue('country'),
-      grid: getXMLValue('grid'),
+      grid: getXMLValue('grid') || getXMLValue('gridsquare') || getXMLValue('gridSquare'), // Try multiple field names
       cqzone: getXMLValue('cqzone'),
       ituzone: getXMLValue('ituzone'),
       email: getXMLValue('email'),

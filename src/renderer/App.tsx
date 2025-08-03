@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import { RootState, AppDispatch } from './store/store';
 import { loadSettings } from './store/settingSlice';
 import { loadQSOs, addQSO } from './store/qsoSlice';
+import { endContest } from './store/contestSlice';
 import Header from './components/Header';
 import LogTable from './components/LogTable';
 import EntryForm from './components/EntryForm';
@@ -39,6 +40,7 @@ function App() {
   const showDXCluster = useSelector((state: RootState) => state.cluster.showDXCluster);
   const showPropagation = useSelector((state: RootState) => state.cluster.showPropagation);
   const qsos = useSelector((state: RootState) => state.qsos.qsos);
+  const contest = useSelector((state: RootState) => state.contest);
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [contestOpen, setContestOpen] = React.useState(false);
@@ -70,6 +72,18 @@ function App() {
           break;
         case 'menu-contest-settings':
           setContestOpen(true);
+          break;
+        case 'menu-start-contest':
+          if (!contest.isActive) {
+            setContestOpen(true);
+          }
+          break;
+        case 'menu-end-contest':
+          if (contest.isActive) {
+            if (window.confirm('Are you sure you want to end the contest?')) {
+              dispatch(endContest());
+            }
+          }
           break;
         case 'menu-new-log':
           if (window.confirm('Are you sure you want to start a new log? This will clear all QSOs.')) {
@@ -174,11 +188,20 @@ function App() {
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Header onSettingsClick={() => setSettingsOpen(true)} />
+        <Header 
+          onSettingsClick={() => setSettingsOpen(true)}
+          onContestClick={() => setContestOpen(true)}
+        />
         
         <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
           {/* Main Content Area */}
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+          <Box sx={{ 
+            flex: 1, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            p: { xs: 1, sm: 1.5, md: 2 },  // Responsive padding
+            minWidth: 0  // Allows flex child to shrink below content size
+          }}>
             <EntryForm />
             <Box sx={{ mt: 2, mb: 2 }}>
               <Statistics />
@@ -188,9 +211,16 @@ function App() {
             </Box>
           </Box>
 
-          {/* Right Sidebar */}
+          {/* Right Sidebar - Responsive width */}
           {(showDXCluster || showMap || showPropagation) && (
-            <Box sx={{ width: 400, display: 'flex', flexDirection: 'column', p: 2 }}>
+            <Box sx={{ 
+              width: { xs: 280, sm: 320, md: 360, lg: 400 },  // Responsive width
+              display: 'flex', 
+              flexDirection: 'column', 
+              p: { xs: 0.5, sm: 1, md: 1.5 },  // Reduced padding
+              pl: { xs: 0.5, sm: 1, md: 2 },   // Extra left padding for separation
+              minWidth: 0  // Allows shrinking
+            }}>
               {/* Propagation Widget */}
               {showPropagation && (
                 <Box sx={{ mb: (showMap || showDXCluster) ? 2 : 0 }}>

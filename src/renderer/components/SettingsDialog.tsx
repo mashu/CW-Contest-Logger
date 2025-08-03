@@ -7,18 +7,17 @@ import {
   DialogActions,
   Button,
   TextField,
-  FormControlLabel,
-  Switch,
-  Grid,
-  Tab,
-  Tabs,
-  Box,
-  Typography,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Slider,
+  Grid,
+  Switch,
+  FormControlLabel,
+  Typography,
+  Box,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import { RootState, AppDispatch } from '../store/store';
 import { updateSettings } from '../store/settingSlice';
@@ -32,7 +31,11 @@ interface TabPanelProps {
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
   return (
-    <div hidden={value !== index} {...other}>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      {...other}
+    >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
@@ -46,45 +49,51 @@ interface SettingsDialogProps {
 const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
   const settings = useSelector((state: RootState) => state.settings.settings);
-  const [tabValue, setTabValue] = React.useState(0);
   const [localSettings, setLocalSettings] = React.useState(settings);
+  const [tabValue, setTabValue] = React.useState(0);
 
   React.useEffect(() => {
     setLocalSettings(settings);
   }, [settings]);
 
+  const handleChange = (field: string, value: any) => {
+    setLocalSettings(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  const handleChange = (field: string, value: any) => {
-    setLocalSettings({ ...localSettings, [field]: value });
+  const handleSave = () => {
+    dispatch(updateSettings(localSettings));
+    onClose();
   };
 
-  const handleSave = async () => {
-    dispatch(updateSettings(localSettings));
-    await window.electronAPI.saveSettings(localSettings);
+  const handleClose = () => {
+    setLocalSettings(settings);
+    setTabValue(0);
     onClose();
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>Settings</DialogTitle>
-      <DialogContent>
-        <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tab label="Station" />
-          <Tab label="Contest" />
-          <Tab label="Connections" />
-          <Tab label="Interface" />
-        </Tabs>
+      <DialogContent sx={{ minHeight: 400 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange}>
+            <Tab label="Station" />
+            <Tab label="Connections" />
+          </Tabs>
+        </Box>
 
         <TabPanel value={tabValue} index={0}>
+          {/* Station Settings */}
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Call Sign"
-                value={localSettings.callsign}
+                value={localSettings.callsign || ''}
                 onChange={(e) => handleChange('callsign', e.target.value.toUpperCase())}
                 inputProps={{ style: { textTransform: 'uppercase' } }}
               />
@@ -93,16 +102,16 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
               <TextField
                 fullWidth
                 label="Grid Square"
-                value={localSettings.gridSquare}
+                value={localSettings.gridSquare || ''}
                 onChange={(e) => handleChange('gridSquare', e.target.value.toUpperCase())}
-                inputProps={{ style: { textTransform: 'uppercase' } }}
+                helperText="Your station's grid square (e.g., FN20)"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Name"
-                value={localSettings.name}
+                value={localSettings.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
               />
             </Grid>
@@ -110,7 +119,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
               <TextField
                 fullWidth
                 label="QTH"
-                value={localSettings.qth}
+                value={localSettings.qth || ''}
                 onChange={(e) => handleChange('qth', e.target.value)}
               />
             </Grid>
@@ -120,126 +129,69 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
                 label="QRZ.com Username"
                 value={localSettings.qrzUsername || ''}
                 onChange={(e) => handleChange('qrzUsername', e.target.value)}
-                helperText="Your QRZ.com login username for automatic callsign lookups"
+                helperText="Required for callsign lookups"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
+                type="password"
                 label="QRZ.com Password"
                 value={localSettings.qrzPassword || ''}
                 onChange={(e) => handleChange('qrzPassword', e.target.value)}
-                type="password"
-                helperText="Your QRZ.com password (stored securely locally)"
+                helperText="Your QRZ.com account password"
               />
             </Grid>
           </Grid>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
+          {/* Connection Settings */}
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Default Contest Mode</InputLabel>
-                <Select
-                  value={localSettings.contestMode}
-                  onChange={(e) => handleChange('contestMode', e.target.value)}
-                  label="Default Contest Mode"
-                >
-                  <MenuItem value="CQ WW">CQ WW</MenuItem>
-                  <MenuItem value="CQ WPX">CQ WPX</MenuItem>
-                  <MenuItem value="ARRL DX">ARRL DX</MenuItem>
-                  <MenuItem value="IARU HF">IARU HF</MenuItem>
-                  <MenuItem value="WAE">WAE</MenuItem>
-                  <MenuItem value="Field Day">Field Day</MenuItem>
-                  <MenuItem value="Custom">Custom</MenuItem>
-                </Select>
-              </FormControl>
+              <Typography variant="h6" gutterBottom>
+                Cluster Connections
+              </Typography>
             </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={localSettings.autoTime}
-                    onChange={(e) => handleChange('autoTime', e.target.checked)}
-                  />
-                }
-                label="Automatic Date/Time"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={localSettings.soundEnabled}
-                    onChange={(e) => handleChange('soundEnabled', e.target.checked)}
-                  />
-                }
-                label="Enable Sound Effects"
-              />
-            </Grid>
-          </Grid>
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={2}>
-          <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="DX Cluster URL"
-                value={localSettings.dxClusterUrl}
+                value={localSettings.dxClusterUrl || ''}
                 onChange={(e) => handleChange('dxClusterUrl', e.target.value)}
-                helperText="Format: telnet://hostname:port"
+                helperText="Telnet URL for DX cluster (e.g., telnet://dxc.nc7j.com:7373)"
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="RBN URL"
-                value={localSettings.rbnUrl}
+                value={localSettings.rbnUrl || ''}
                 onChange={(e) => handleChange('rbnUrl', e.target.value)}
-                helperText="Format: telnet://hostname:port"
+                helperText="Reverse Beacon Network URL"
               />
             </Grid>
-          </Grid>
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={3}>
-          <Grid container spacing={3}>
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Rig Interface</InputLabel>
                 <Select
-                  value={localSettings.rigInterface}
+                  value={localSettings.rigInterface || 'none'}
                   onChange={(e) => handleChange('rigInterface', e.target.value)}
                   label="Rig Interface"
                 >
                   <MenuItem value="none">None</MenuItem>
-                  <MenuItem value="hamlib">Hamlib</MenuItem>
-                  <MenuItem value="flrig">FLRig</MenuItem>
+                  <MenuItem value="hamlib">Ham Radio Control Libraries</MenuItem>
+                  <MenuItem value="n1mm">N1MM Logger+</MenuItem>
                   <MenuItem value="omnirig">OmniRig</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography gutterBottom>CW Speed (WPM)</Typography>
-              <Slider
-                value={localSettings.cwSpeed}
-                onChange={(e, value) => handleChange('cwSpeed', value)}
-                min={5}
-                max={50}
-                marks
-                valueLabelDisplay="auto"
-              />
             </Grid>
           </Grid>
         </TabPanel>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">
-          Save
-        </Button>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleSave} variant="contained">Save</Button>
       </DialogActions>
     </Dialog>
   );
