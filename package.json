@@ -1,18 +1,19 @@
 {
   "name": "cw-contest-logger",
-  "version": "0.1.1",
+  "version": "0.0.1",
   "description": "Professional CW Contest Logger with ADI Export",
   "main": "dist/main.js",
   "scripts": {
     "start": "npm run build && electron .",
     "dev": "concurrently \"npm run watch\" \"wait-on dist/main.js && electron .\"",
     "build": "tsc && webpack",
+    "build:prod": "NODE_ENV=production tsc && NODE_ENV=production webpack",
     "watch": "concurrently \"tsc -w\" \"webpack --watch\"",
-    "dist": "npm run build && electron-builder",
-    "dist:all": "npm run build && electron-builder --publish=never --win --mac --linux",
-    "dist:win": "npm run build && electron-builder --win",
-    "dist:mac": "npm run build && electron-builder --mac",
-    "dist:linux": "npm run build && electron-builder --linux",
+    "dist": "npm run build:prod && electron-builder",
+    "dist:all": "npm run build:prod && electron-builder --publish=never --win --mac --linux",
+    "dist:win": "npm run build:prod && electron-builder --win",
+    "dist:mac": "npm run build:prod && electron-builder --mac",
+    "dist:linux": "npm run build:prod && electron-builder --linux",
     "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
