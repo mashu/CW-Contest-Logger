@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import { RootState, AppDispatch } from './store/store';
 import { loadSettings } from './store/settingSlice';
-import { loadQSOs } from './store/qsoSlice';
+import { loadQSOs, addQSO } from './store/qsoSlice';
 import Header from './components/Header';
 import LogTable from './components/LogTable';
 import EntryForm from './components/EntryForm';
@@ -12,6 +12,7 @@ import WorldMap from './components/WorldMap';
 import Statistics from './components/Statistics';
 import SettingsDialog from './components/SettingsDialog';
 import ContestDialog from './components/ContestDialog';
+import PropagationWidget from './components/PropagationWidget';
 import './services/clusterService'; // Initialize cluster service
 
 declare global {
@@ -20,6 +21,8 @@ declare global {
       saveSettings: (settings: any) => Promise<any>;
       getSettings: () => Promise<any>;
       exportADI: (qsos: any[]) => Promise<any>;
+      importADI: () => Promise<any>;
+      openLogLocation: () => Promise<any>;
       saveQSOs: (qsos: any[]) => Promise<any>;
       getQSOs: () => Promise<any>;
       onMenuAction: (callback: (action: string) => void) => void;
@@ -46,6 +49,12 @@ function App() {
       switch (action) {
         case 'menu-export-adi':
           handleExportADI();
+          break;
+        case 'menu-import-adi':
+          handleImportADI();
+          break;
+        case 'menu-open-log':
+          handleOpenLog();
           break;
         case 'menu-toggle-dx-cluster':
           dispatch({ type: 'cluster/toggleDXCluster' });
@@ -88,11 +97,39 @@ function App() {
     try {
       const result = await window.electronAPI.exportADI(qsos);
       if (result.success) {
-        alert(`Successfully exported to ${result.path}`);
+        alert(`Log exported successfully to: ${result.path}`);
       }
     } catch (error) {
-      console.error('Error exporting ADI:', error);
-      alert('Failed to export ADI file');
+      alert('Error exporting log');
+      console.error('Export error:', error);
+    }
+  };
+
+  const handleImportADI = async () => {
+    try {
+      const result = await window.electronAPI.importADI();
+      if (result.success && result.qsos) {
+        const confirmMsg = `Import ${result.qsos.length} QSOs from ${result.path}?\nThis will be added to your current log.`;
+        if (window.confirm(confirmMsg)) {
+          result.qsos.forEach((qso: any) => dispatch(addQSO(qso)));
+          alert(`Successfully imported ${result.qsos.length} QSOs`);
+        }
+      }
+    } catch (error) {
+      alert('Error importing ADI file');
+      console.error('Import error:', error);
+    }
+  };
+
+  const handleOpenLog = async () => {
+    try {
+      const result = await window.electronAPI.openLogLocation();
+      if (result.success) {
+        alert(`Current log stored at: ${result.path}\nLocation opened in file manager.`);
+      }
+    } catch (error) {
+      alert('Error opening log location');
+      console.error('Open log error:', error);
     }
   };
 
@@ -148,13 +185,16 @@ function App() {
           {/* Right Sidebar */}
           {(showDXCluster || showMap) && (
             <Box sx={{ width: 400, display: 'flex', flexDirection: 'column', p: 2 }}>
+              {/* Propagation Widget */}
+              <PropagationWidget />
+              
               {showMap && (
-                <Box sx={{ height: showDXCluster ? '50%' : '100%', mb: showDXCluster ? 2 : 0 }}>
+                <Box sx={{ height: showDXCluster ? '40%' : '60%', mb: showDXCluster ? 2 : 0 }}>
                   <WorldMap />
                 </Box>
               )}
               {showDXCluster && (
-                <Box sx={{ height: showMap ? '50%' : '100%' }}>
+                <Box sx={{ height: showMap ? '40%' : '60%' }}>
                   <DXCluster />
                 </Box>
               )}

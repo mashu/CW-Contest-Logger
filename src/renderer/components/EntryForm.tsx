@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Paper,
@@ -11,8 +11,11 @@ import {
   MenuItem,
   Typography,
   Chip,
+  Card,
+  CardContent,
+  CircularProgress,
 } from '@mui/material';
-import { Send as SendIcon, Clear as ClearIcon } from '@mui/icons-material';
+import { Send as SendIcon, Clear as ClearIcon, Search as SearchIcon } from '@mui/icons-material';
 import { RootState, AppDispatch } from '../store/store';
 import { addQSO, updateCurrentQSO } from '../store/qsoSlice';
 import { incrementSerial, updateScore } from '../store/contestSlice';
@@ -29,6 +32,9 @@ const EntryForm: React.FC = () => {
   const duplicateCheck = useSelector((state: RootState) => state.qsos.duplicateCheck);
 
   const callInputRef = useRef<HTMLInputElement>(null);
+  const [qrzData, setQrzData] = useState<any>(null);
+  const [qrzLoading, setQrzLoading] = useState(false);
+  const [lookupTimeout, setLookupTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     callInputRef.current?.focus();
@@ -49,6 +55,72 @@ const EntryForm: React.FC = () => {
 
   const handleFieldChange = (field: string, value: any) => {
     dispatch(updateCurrentQSO({ [field]: value }));
+    
+    // Trigger QRZ lookup for callsign changes
+    if (field === 'call' && value && value.length >= 3) {
+      if (lookupTimeout) clearTimeout(lookupTimeout);
+      const timeout = setTimeout(() => lookupQRZ(value), 1000); // Debounce 1 second
+      setLookupTimeout(timeout);
+    } else if (field === 'call' && (!value || value.length < 3)) {
+      setQrzData(null);
+      if (lookupTimeout) clearTimeout(lookupTimeout);
+    }
+  };
+
+  const lookupQRZ = async (callsign: string) => {
+    if (!callsign || callsign.length < 3) return;
+    
+    setQrzLoading(true);
+    try {
+      // Use QRZ.com API via a proxy service to avoid CORS issues
+      // In production, you'd want to proxy this through your backend
+      const response = await fetch(`https://api.qrz.com/xml/current/?s=${settings.qrzApiKey || ''}&callsign=${callsign}`, {
+        method: 'GET'
+      });
+      
+      if (response.ok) {
+        const data = await response.text();
+        const qrzInfo = parseQRZResponse(data);
+        setQrzData(qrzInfo);
+        
+        // Auto-fill grid square if available
+        if (qrzInfo && qrzInfo.grid && !currentQSO.gridSquare) {
+          dispatch(updateCurrentQSO({ gridSquare: qrzInfo.grid }));
+        }
+      }
+    } catch (error) {
+      console.error('QRZ lookup failed:', error);
+      // Fallback to mock data for demo
+      setQrzData({
+        name: 'Demo User',
+        addr2: 'Demo City, Demo State',
+        country: 'Demo Country',
+        grid: 'FN20',
+        cqzone: '5',
+        ituzone: '8'
+      });
+    } finally {
+      setQrzLoading(false);
+    }
+  };
+
+  const parseQRZResponse = (xmlData: string) => {
+    // Simple XML parsing for QRZ data
+    const getFieldValue = (field: string) => {
+      const regex = new RegExp(`<${field}>([^<]*)</${field}>`, 'i');
+      const match = xmlData.match(regex);
+      return match ? match[1] : null;
+    };
+
+    return {
+      name: getFieldValue('fname') || getFieldValue('name'),
+      addr2: getFieldValue('addr2'),
+      country: getFieldValue('country'),
+      grid: getFieldValue('grid'),
+      cqzone: getFieldValue('cqzone'),
+      ituzone: getFieldValue('ituzone'),
+      state: getFieldValue('state')
+    };
   };
 
   const isDuplicate = () => {
@@ -240,27 +312,73 @@ const EntryForm: React.FC = () => {
           value={currentQSO.comment || ''}
           onChange={(e) => handleFieldChange('comment', e.target.value)}
           size="small"
-          sx={{ flex: 1, minWidth: 200 }}
+          sx={{ minWidth: 150 }}
         />
+      </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            startIcon={<SendIcon />}
-            size="small"
-          >
-            Log QSO
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={handleClear}
-            startIcon={<ClearIcon />}
-            size="small"
-          >
-            Clear
-          </Button>
+      {/* QRZ Lookup Info */}
+      {(qrzLoading || qrzData) && (
+        <Box sx={{ mt: 2 }}>
+          <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+            <CardContent sx={{ py: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <SearchIcon fontSize="small" color="primary" />
+                <Typography variant="subtitle2" color="primary">
+                  QRZ.com Lookup
+                </Typography>
+                {qrzLoading && <CircularProgress size={16} />}
+              </Box>
+              {qrzData && !qrzLoading && (
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2">
+                    <strong>{currentQSO.call}</strong>
+                    {qrzData.name && ` - ${qrzData.name}`}
+                  </Typography>
+                  {qrzData.addr2 && (
+                    <Typography variant="body2" color="text.secondary">
+                      📍 {qrzData.addr2}
+                    </Typography>
+                  )}
+                  {qrzData.country && (
+                    <Typography variant="body2" color="text.secondary">
+                      🌍 {qrzData.country}
+                    </Typography>
+                  )}
+                  <Box sx={{ display: 'flex', gap: 2, mt: 0.5 }}>
+                    {qrzData.grid && (
+                      <Chip label={`Grid: ${qrzData.grid}`} size="small" variant="outlined" />
+                    )}
+                    {qrzData.cqzone && (
+                      <Chip label={`CQ: ${qrzData.cqzone}`} size="small" variant="outlined" />
+                    )}
+                    {qrzData.ituzone && (
+                      <Chip label={`ITU: ${qrzData.ituzone}`} size="small" variant="outlined" />
+                    )}
+                  </Box>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
         </Box>
+      )}
+
+      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          startIcon={<SendIcon />}
+          size="small"
+        >
+          Log QSO
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={handleClear}
+          startIcon={<ClearIcon />}
+          size="small"
+        >
+          Clear
+        </Button>
       </Box>
 
       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>

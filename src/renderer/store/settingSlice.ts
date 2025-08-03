@@ -13,6 +13,8 @@ export interface Settings {
   cwSpeed: number;
   rigInterface: string;
   theme: 'light' | 'dark';
+  duplicateCheck: boolean;
+  qrzApiKey?: string;
 }
 
 interface SettingsState {
@@ -34,6 +36,8 @@ const initialState: SettingsState = {
     cwSpeed: 25,
     rigInterface: 'none',
     theme: 'dark',
+    duplicateCheck: true,
+    qrzApiKey: '',
   },
   isLoading: false,
 };
