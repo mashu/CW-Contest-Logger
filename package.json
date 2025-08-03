@@ -1,6 +1,6 @@
 {
   "name": "cw-contest-logger",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Professional CW Contest Logger with ADI Export",
   "main": "dist/main.js",
   "scripts": {
