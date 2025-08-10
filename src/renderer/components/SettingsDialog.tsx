@@ -64,8 +64,13 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
     setTabValue(newValue);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     dispatch(updateSettings(localSettings));
+    try {
+      await window.electronAPI.saveSettings(localSettings);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    }
     onClose();
   };
 
@@ -83,6 +88,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="Station" />
             <Tab label="Connections" />
+            <Tab label="Appearance" />
           </Tabs>
         </Box>
 
@@ -185,6 +191,35 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
                   <MenuItem value="omnirig">OmniRig</MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+          </Grid>
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={2}>
+          {/* Appearance Settings */}
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom>
+                Theme & Appearance
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Theme</InputLabel>
+                <Select
+                  value={localSettings.theme || 'dark'}
+                  onChange={(e) => handleChange('theme', e.target.value)}
+                  label="Theme"
+                >
+                  <MenuItem value="light">Light Theme</MenuItem>
+                  <MenuItem value="dark">Dark Theme</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2" color="text.secondary">
+                You can also quickly toggle the theme using the theme button in the header toolbar.
+              </Typography>
             </Grid>
           </Grid>
         </TabPanel>

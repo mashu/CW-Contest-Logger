@@ -14,10 +14,13 @@ import {
   PlayArrow as StartIcon,
   Stop as StopIcon,
   Timer as TimerIcon,
+  LightMode as LightModeIcon,
+  DarkMode as DarkModeIcon,
 } from '@mui/icons-material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
 import { endContest } from '../store/contestSlice';
+import { toggleTheme } from '../store/settingSlice';
 
 interface HeaderProps {
   onSettingsClick: () => void;
@@ -28,6 +31,8 @@ const Header: React.FC<HeaderProps> = ({ onSettingsClick, onContestClick }) => {
   const dispatch = useDispatch<AppDispatch>();
   const contest = useSelector((state: RootState) => state.contest);
   const qsos = useSelector((state: RootState) => state.qsos.qsos);
+  const settings = useSelector((state: RootState) => state.settings.settings);
+  const theme = settings.theme;
   const [contestTime, setContestTime] = useState<string>('');
 
   // Update contest timer every second
@@ -63,6 +68,20 @@ const Header: React.FC<HeaderProps> = ({ onSettingsClick, onContestClick }) => {
   const handleQuickEndContest = () => {
     if (window.confirm('Quick end contest? This will stop the current contest.')) {
       dispatch(endContest());
+    }
+  };
+
+  const handleThemeToggle = async () => {
+    dispatch(toggleTheme());
+    // Save the updated settings
+    const updatedSettings = {
+      ...settings,
+      theme: theme === 'light' ? 'dark' : 'light'
+    };
+    try {
+      await window.electronAPI.saveSettings(updatedSettings);
+    } catch (error) {
+      console.error('Error saving theme preference:', error);
     }
   };
 
@@ -113,6 +132,17 @@ const Header: React.FC<HeaderProps> = ({ onSettingsClick, onContestClick }) => {
               </Button>
             </Tooltip>
           )}
+          
+          <Tooltip title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Theme`}>
+            <Button
+              color="inherit"
+              startIcon={theme === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+              onClick={handleThemeToggle}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              {theme === 'light' ? 'Dark' : 'Light'}
+            </Button>
+          </Tooltip>
           
           <Tooltip title="Settings (Ctrl+,)">
             <Button

@@ -44,6 +44,7 @@ function App() {
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [contestOpen, setContestOpen] = React.useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
 
   useEffect(() => {
     // Load initial data
@@ -88,6 +89,8 @@ function App() {
         case 'menu-new-log':
           if (window.confirm('Are you sure you want to start a new log? This will clear all QSOs.')) {
             dispatch({ type: 'qsos/clearLog' });
+            // Explicitly save the cleared state
+            window.electronAPI.saveQSOs([]);
           }
           break;
       }
@@ -95,11 +98,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Auto-save QSOs
-    if (qsos.length > 0) {
+    // Auto-save QSOs (but not on initial empty state)
+    if (initialLoadComplete) {
       window.electronAPI.saveQSOs(qsos);
     }
-  }, [qsos]);
+  }, [qsos, initialLoadComplete]);
 
   const loadInitialData = async () => {
     try {
@@ -108,8 +111,13 @@ function App() {
 
       const savedQSOs = await window.electronAPI.getQSOs();
       dispatch(loadQSOs(savedQSOs));
+      
+      // Mark initial load as complete to enable auto-saving
+      setInitialLoadComplete(true);
     } catch (error) {
       console.error('Error loading initial data:', error);
+      // Still mark as complete even if there's an error to enable auto-saving
+      setInitialLoadComplete(true);
     }
   };
 

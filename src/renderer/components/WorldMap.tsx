@@ -9,6 +9,7 @@ const WorldMap: React.FC = () => {
   const dxSpots = useSelector((state: RootState) => state.cluster.dxSpots);
   const rbnSpots = useSelector((state: RootState) => state.cluster.rbnSpots);
   const settings = useSelector((state: RootState) => state.settings.settings);
+  const theme = useSelector((state: RootState) => state.settings.settings.theme);
   const [showType, setShowType] = React.useState<'dx' | 'rbn' | 'both'>('both');
 
   // Convert grid square to lat/lon
@@ -75,8 +76,15 @@ const WorldMap: React.FC = () => {
           style={{ height: '100%', width: '100%' }}
         >
           <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            key={theme} // Force re-render when theme changes
+            url={theme === 'dark' 
+              ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            }
+            attribution={theme === 'dark'
+              ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }
           />
           
           {/* User location */}
@@ -84,7 +92,7 @@ const WorldMap: React.FC = () => {
             center={userLocation}
             radius={8}
             fillColor="#2196f3"
-            color="#fff"
+            color={theme === 'dark' ? "#fff" : "#000"}
             weight={2}
             opacity={1}
             fillOpacity={1}
@@ -104,7 +112,7 @@ const WorldMap: React.FC = () => {
                 center={[spot.latitude!, spot.longitude!]}
                 radius={6}
                 fillColor="#f50057"
-                color="#fff"
+                color={theme === 'dark' ? "#fff" : "#000"}
                 weight={1}
                 opacity={0.8}
                 fillOpacity={0.8}
@@ -133,7 +141,7 @@ const WorldMap: React.FC = () => {
                 center={[spot.latitude!, spot.longitude!]}
                 radius={4}
                 fillColor="#4caf50"
-                color="#fff"
+                color={theme === 'dark' ? "#fff" : "#000"}
                 weight={1}
                 opacity={0.6}
                 fillOpacity={0.6}
