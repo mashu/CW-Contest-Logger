@@ -1,20 +1,66 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
+import { ThemeProvider, createTheme, CssBaseline, Box, CircularProgress, Typography, Paper } from '@mui/material';
 import { RootState, AppDispatch } from './store/store';
 import { loadSettings } from './store/settingSlice';
 import { loadQSOs, addQSO } from './store/qsoSlice';
 import { endContest } from './store/contestSlice';
+
+// Essential components - loaded immediately
 import Header from './components/Header';
 import LogTable from './components/LogTable';
 import EntryForm from './components/EntryForm';
 import DXCluster from './components/DXCluster';
-import WorldMap from './components/WorldMap';
 import Statistics from './components/Statistics';
 import SettingsDialog from './components/SettingsDialog';
 import ContestDialog from './components/ContestDialog';
-import PropagationWidget from './components/PropagationWidget';
-import './services/clusterService'; // Initialize cluster service
+
+// Heavy components - lazy loaded
+const LazyWorldMap = React.lazy(() => import('./components/WorldMap'));
+const LazyPropagationWidget = React.lazy(() => import('./components/PropagationWidget'));
+
+// Performance timing utility
+const perfTimer = {
+  start: (label: string) => {
+    const startTime = performance.now();
+    console.log(`⏱️ [PERF] Starting: ${label}`);
+    return {
+      end: () => {
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        console.log(`⏱️ [PERF] Completed: ${label} in ${duration.toFixed(2)}ms`);
+        return duration;
+      }
+    };
+  }
+};
+
+// Lazy component wrapper with loading indicator
+const LazyLoader: React.FC<{ 
+  children: React.ReactNode; 
+  name: string;
+  height?: string;
+}> = ({ children, name, height = '200px' }) => (
+  <Suspense 
+    fallback={
+      <Paper sx={{ 
+        height,
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 1
+      }}>
+        <CircularProgress size={24} />
+        <Typography variant="caption" color="text.secondary">
+          Loading {name}...
+        </Typography>
+      </Paper>
+    }
+  >
+    {children}
+  </Suspense>
+);
 
 declare global {
   interface Window {
@@ -45,10 +91,24 @@ function App() {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [contestOpen, setContestOpen] = React.useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
+  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    // Load initial data
-    loadInitialData();
+    const appTimer = perfTimer.start('App initialization');
+    
+    // Load initial data immediately
+    loadInitialData().then(() => {
+      appTimer.end();
+      setAppReady(true);
+    });
+
+    // Defer heavy service initialization
+    setTimeout(() => {
+      const serviceTimer = perfTimer.start('Background services initialization');
+      import('./services/clusterService').then(() => {
+        serviceTimer.end();
+      });
+    }, 100);
 
     // Listen for menu actions
     window.electronAPI.onMenuAction((action) => {
@@ -99,21 +159,31 @@ function App() {
 
   useEffect(() => {
     // Auto-save QSOs (but not on initial empty state)
-    if (initialLoadComplete) {
-      window.electronAPI.saveQSOs(qsos);
+    if (initialLoadComplete && appReady) {
+      const saveTimer = perfTimer.start('QSO save operation');
+      window.electronAPI.saveQSOs(qsos).then(() => {
+        saveTimer.end();
+      });
     }
-  }, [qsos, initialLoadComplete]);
+  }, [qsos, initialLoadComplete, appReady]);
 
   const loadInitialData = async () => {
     try {
+      const loadTimer = perfTimer.start('Initial data loading');
+      
+      const settingsTimer = perfTimer.start('Settings load');
       const settings = await window.electronAPI.getSettings();
       dispatch(loadSettings(settings));
+      settingsTimer.end();
 
+      const qsoTimer = perfTimer.start('QSO data load');
       const savedQSOs = await window.electronAPI.getQSOs();
       dispatch(loadQSOs(savedQSOs));
+      qsoTimer.end();
       
       // Mark initial load as complete to enable auto-saving
       setInitialLoadComplete(true);
+      loadTimer.end();
     } catch (error) {
       console.error('Error loading initial data:', error);
       // Still mark as complete even if there's an error to enable auto-saving
@@ -192,6 +262,28 @@ function App() {
     },
   });
 
+  // Show loading screen while app is initializing
+  if (!appReady) {
+    return (
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <CircularProgress size={48} />
+          <Typography variant="h6" color="text.secondary">
+            Initializing ContestLogger...
+          </Typography>
+        </Box>
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
@@ -229,10 +321,12 @@ function App() {
               pl: { xs: 0.5, sm: 1, md: 2 },   // Extra left padding for separation
               minWidth: 0  // Allows shrinking
             }}>
-              {/* Propagation Widget */}
+              {/* Propagation Widget - Lazy Loaded */}
               {showPropagation && (
                 <Box sx={{ mb: (showMap || showDXCluster) ? 2 : 0 }}>
-                  <PropagationWidget />
+                  <LazyLoader name="Propagation Widget" height="300px">
+                    <LazyPropagationWidget />
+                  </LazyLoader>
                 </Box>
               )}
               
@@ -248,7 +342,9 @@ function App() {
                     <>
                       {showMap && (
                         <Box sx={{ height: '30%', mb: showDXCluster ? 2 : 0 }}>
-                          <WorldMap />
+                          <LazyLoader name="World Map" height="100%">
+                            <LazyWorldMap />
+                          </LazyLoader>
                         </Box>
                       )}
                       {showDXCluster && (
@@ -264,7 +360,9 @@ function App() {
                     <>
                       {showMap && (
                         <Box sx={{ height: '60%' }}>
-                          <WorldMap />
+                          <LazyLoader name="World Map" height="100%">
+                            <LazyWorldMap />
+                          </LazyLoader>
                         </Box>
                       )}
                       {showDXCluster && (
@@ -280,7 +378,9 @@ function App() {
                     <>
                       {showMap && (
                         <Box sx={{ height: showDXCluster ? '50%' : '100%', mb: showDXCluster ? 2 : 0 }}>
-                          <WorldMap />
+                          <LazyLoader name="World Map" height="100%">
+                            <LazyWorldMap />
+                          </LazyLoader>
                         </Box>
                       )}
                       {showDXCluster && (

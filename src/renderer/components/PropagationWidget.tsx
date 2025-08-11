@@ -32,6 +32,7 @@ interface BandCondition {
 const PropagationWidget: React.FC = () => {
   const settings = useSelector((state: RootState) => state.settings.settings);
   const [expanded, setExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [solarData, setSolarData] = useState({
     sfi: 85,
     sunspotNumber: 12,
@@ -42,29 +43,67 @@ const PropagationWidget: React.FC = () => {
   });
   const [bandConditions, setBandConditions] = useState<BandCondition[]>([]);
 
+  // Performance timing utility
+  const perfTimer = {
+    start: (label: string) => {
+      const startTime = performance.now();
+      console.log(`📡 [PROPAGATION] Starting: ${label}`);
+      return {
+        end: () => {
+          const endTime = performance.now();
+          const duration = endTime - startTime;
+          console.log(`📡 [PROPAGATION] Completed: ${label} in ${duration.toFixed(2)}ms`);
+          return duration;
+        }
+      };
+    }
+  };
+
   useEffect(() => {
-    // Simulate fetching propagation data
-    // In a real app, you'd fetch from WWVH, Space Weather, or similar APIs
-    fetchPropagationData();
+    // Defer initial data fetch to not block startup
+    const deferredTimer = perfTimer.start('Propagation widget initialization');
+    
+    // Show estimated data immediately, then load real data after a delay
+    setBandConditions(generateEstimatedConditions());
+    setIsLoading(false);
+    deferredTimer.end();
+    
+    // Fetch real data after 2 seconds to allow UI to render first
+    const deferredTimeout = setTimeout(() => {
+      fetchPropagationData();
+    }, 2000);
+    
+    // Set up periodic updates after initial load
     const interval = setInterval(fetchPropagationData, 300000); // Update every 5 minutes
-    return () => clearInterval(interval);
+    
+    return () => {
+      clearTimeout(deferredTimeout);
+      clearInterval(interval);
+    };
   }, []);
 
   const fetchPropagationData = async () => {
+    const fetchTimer = perfTimer.start('Solar data fetch and processing');
     try {
       // Fetch real-time solar and geomagnetic data
+      const solarDataTimer = perfTimer.start('Solar data API call');
       const solarData = await fetchSolarData();
+      solarDataTimer.end();
       
       if (solarData) {
+        const processingTimer = perfTimer.start('Band conditions calculation');
         setSolarData(solarData);
         // Calculate band conditions directly from solar data
         const propagationData = calculateBandConditionsFromSolar(solarData);
         setBandConditions(propagationData);
+        processingTimer.end();
       }
+      fetchTimer.end();
     } catch (error) {
       console.error('Failed to fetch propagation data:', error);
       // Fallback to basic estimated conditions if all sources fail
       setBandConditions(generateEstimatedConditions());
+      fetchTimer.end();
     }
   };
 

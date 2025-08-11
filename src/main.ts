@@ -3,11 +3,29 @@ import * as path from 'path';
 import Store from 'electron-store';
 import * as fs from 'fs';
 
+// Performance timing utility for main process
+const mainPerfTimer = {
+  start: (label: string) => {
+    const startTime = process.hrtime.bigint();
+    console.log(`🚀 [MAIN] Starting: ${label}`);
+    return {
+      end: () => {
+        const endTime = process.hrtime.bigint();
+        const duration = Number(endTime - startTime) / 1000000; // Convert to ms
+        console.log(`🚀 [MAIN] Completed: ${label} in ${duration.toFixed(2)}ms`);
+        return duration;
+      }
+    };
+  }
+};
+
 const store = new Store();
 
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
+  const windowTimer = mainPerfTimer.start('Window creation');
+  
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -22,7 +40,8 @@ function createWindow() {
     titleBarStyle: 'hiddenInset',
     frame: process.platform !== 'darwin'
   });
-
+  
+  const loadTimer = mainPerfTimer.start('HTML file loading');
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   if (process.env.NODE_ENV === 'development') {
@@ -31,6 +50,12 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+  });
+
+  // Time when the renderer is ready
+  mainWindow.webContents.once('did-finish-load', () => {
+    loadTimer.end();
+    windowTimer.end();
   });
 
   createMenu();
@@ -154,7 +179,11 @@ function createMenu() {
   Menu.setApplicationMenu(menu);
 }
 
-app.whenReady().then(createWindow);
+const appStartTimer = mainPerfTimer.start('Electron app startup');
+app.whenReady().then(() => {
+  appStartTimer.end();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -175,13 +204,16 @@ ipcMain.handle('save-settings', async (event, settings) => {
 });
 
 ipcMain.handle('get-settings', async () => {
-  return store.get('settings', {
+  const timer = mainPerfTimer.start('Settings load from store');
+  const settings = store.get('settings', {
     callsign: '',
     gridSquare: '',
     contestMode: 'CQ WW',
     dxClusterUrl: 'telnet://dxc.nc7j.com:7373',
     rbnUrl: 'telnet://telnet.reversebeacon.net:7000'
   });
+  timer.end();
+  return settings;
 });
 
 ipcMain.handle('export-adi', async (event, qsos) => {
@@ -232,7 +264,10 @@ ipcMain.handle('save-qsos', async (event, qsos) => {
 });
 
 ipcMain.handle('get-qsos', async () => {
-  return store.get('qsos', []);
+  const timer = mainPerfTimer.start('QSO data load from store');
+  const qsos = store.get('qsos', []);
+  timer.end();
+  return qsos;
 });
 
 ipcMain.handle('import-adi', async () => {
