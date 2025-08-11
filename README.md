@@ -7,7 +7,7 @@
 
 > ⚠️ **Early Development Version** - This software is under active development. Features may be incomplete and bugs are expected.
 
-A modern, cross-platform CW contest logging application with real-time DX cluster integration, world map visualization, and ADI export capabilities.
+A modern, cross-platform CW logging application with real-time DX cluster integration, world map visualization, and ADI export capabilities.
 
 ## 📥 Download
 
