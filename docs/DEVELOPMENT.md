@@ -11,8 +11,8 @@
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/mashu/CW-Contest-Logger.git
-cd CW-Contest-Logger
+git clone https://github.com/mashu/CW-Logger.git
+cd CW-Logger
 ```
 
 ### 2. Install Dependencies

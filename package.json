@@ -1,7 +1,7 @@
 {
-  "name": "cw-contest-logger",
+  "name": "cw-logger",
   "version": "0.1.0",
-  "description": "Professional CW Contest Logger with ADI Export",
+  "description": "Professional CW Logger with ADI Export",
   "main": "dist/main.js",
   "scripts": {
     "start": "npm run build && electron .",
@@ -62,8 +62,8 @@
     "uuid": "^9.0.0"
   },
   "build": {
-    "appId": "com.yourcompany.cwcontestlogger",
-    "productName": "CW Contest Logger",
+    "appId": "com.yourcompany.cwlogger",
+    "productName": "CW Logger",
     "directories": {
       "output": "release"
     },
@@ -117,7 +117,7 @@
       ]
     },
     "portable": {
-      "artifactName": "CW-Contest-Logger-${version}-portable.exe"
+      "artifactName": "CW-Logger-${version}-portable.exe"
     }
   }
 }

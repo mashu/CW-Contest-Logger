@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# CW Contest Logger - Quick Start Script
+# CW Logger - Quick Start Script
 
-echo "🎙️  CW Contest Logger - Starting..."
+echo "🎙️  CW Logger - Starting..."
 echo ""
 
 # Check if node_modules exists
@@ -25,5 +25,5 @@ if [ ! -d "dist" ]; then
     fi
 fi
 
-echo "🚀 Launching CW Contest Logger..."
+echo "🚀 Launching CW Logger..."
 npm start

@@ -277,7 +277,7 @@ function App() {
         }}>
           <CircularProgress size={48} />
           <Typography variant="h6" color="text.secondary">
-            Initializing ContestLogger...
+            Initializing CW Logger...
           </Typography>
         </Box>
       </ThemeProvider>

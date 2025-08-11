@@ -1,7 +1,7 @@
 @echo off
-REM CW Contest Logger - Quick Start Script for Windows
+REM CW Logger - Quick Start Script for Windows
 
-echo CW Contest Logger - Starting...
+echo CW Logger - Starting...
 echo.
 
 REM Check if node_modules exists
@@ -26,5 +26,5 @@ if not exist "dist\" (
     )
 )
 
-echo Launching CW Contest Logger...
+echo Launching CW Logger...
 call npm start

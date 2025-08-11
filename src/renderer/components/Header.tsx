@@ -89,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({ onSettingsClick, onContestClick }) => {
     <AppBar position="static" elevation={2}>
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Contest Logger
+          CW Logger
           {contest.isActive && (
             <Box sx={{ display: 'inline-flex', alignItems: 'center', ml: 2 }}>
               <Chip

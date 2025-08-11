@@ -1,6 +1,6 @@
 {
-  "appId": "com.yourcompany.cwcontestlogger",
-  "productName": "CW Contest Logger",
+  "appId": "com.yourcompany.cwlogger",
+  "productName": "CW Logger",
   "directories": {
     "output": "release"
   },
@@ -50,8 +50,8 @@
     "icon": "assets/icon.png",
     "category": "Utility",
     "desktop": {
-      "Name": "CW Contest Logger",
-      "Comment": "Professional CW Contest Logging Software",
+      "Name": "CW Logger",
+      "Comment": "Professional CW Logging Software",
       "Categories": "Utility;HamRadio;"
     }
   },

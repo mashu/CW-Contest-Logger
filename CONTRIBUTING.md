@@ -1,4 +1,4 @@
-# Contributing to CW Contest Logger
+# Contributing to CW Logger
 
 Thank you for your interest in contributing! This project welcomes contributions of all kinds.
 
@@ -6,7 +6,7 @@ Thank you for your interest in contributing! This project welcomes contributions
 
 ### 🐛 Reporting Bugs
 
-1. Check if the bug has already been reported in [Issues](https://github.com/mashu/CW-Contest-Logger/issues)
+1. Check if the bug has already been reported in [Issues](https://github.com/mashu/CW-Logger/issues)
 2. If not, create a new issue with:
    - Clear description of the bug
    - Steps to reproduce
@@ -16,7 +16,7 @@ Thank you for your interest in contributing! This project welcomes contributions
 
 ### 💡 Suggesting Features
 
-1. Check existing [Issues](https://github.com/mashu/CW-Contest-Logger/issues) and [Discussions](https://github.com/mashu/CW-Contest-Logger/discussions)
+1. Check existing [Issues](https://github.com/mashu/CW-Logger/issues) and [Discussions](https://github.com/mashu/CW-Logger/discussions)
 2. Create a new issue with:
    - Clear description of the feature
    - Use cases and benefits
@@ -76,7 +76,7 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed setup instructions.
 
 ## Getting Help
 
-- Join discussions in [GitHub Discussions](https://github.com/mashu/CW-Contest-Logger/discussions)
+- Join discussions in [GitHub Discussions](https://github.com/mashu/CW-Logger/discussions)
 - Ask questions in issues
 - Review existing code and documentation
 
@@ -86,4 +86,4 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ---
 
-**Thank you for helping make CW Contest Logger better!** 73! 
+**Thank you for helping make CW Logger better!** 73!

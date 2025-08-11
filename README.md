@@ -1,9 +1,9 @@
-# CW Contest Logger
+# CW Logger
 
-[![GitHub Release](https://img.shields.io/github/v/release/mashu/CW-Contest-Logger?include_prereleases&label=Latest%20Release)](https://github.com/mashu/CW-Contest-Logger/releases/latest)
-[![GitHub Downloads](https://img.shields.io/github/downloads/mashu/CW-Contest-Logger/total?label=Downloads)](https://github.com/mashu/CW-Contest-Logger/releases)
-[![License](https://img.shields.io/github/license/mashu/CW-Contest-Logger)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/mashu/CW-Contest-Logger/build.yml?branch=main)](https://github.com/mashu/CW-Contest-Logger/actions)
+[![GitHub Release](https://img.shields.io/github/v/release/mashu/CW-Logger?include_prereleases&label=Latest%20Release)](https://github.com/mashu/CW-Logger/releases/latest)
+[![GitHub Downloads](https://img.shields.io/github/downloads/mashu/CW-Logger/total?label=Downloads)](https://github.com/mashu/CW-Logger/releases)
+[![License](https://img.shields.io/github/license/mashu/CW-Logger)](LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/mashu/CW-Logger/build.yml?branch=main)](https://github.com/mashu/CW-Logger/actions)
 
 > ⚠️ **Early Development Version** - This software is under active development. Features may be incomplete and bugs are expected.
 
@@ -11,7 +11,7 @@ A modern, cross-platform CW contest logging application with real-time DX cluste
 
 ## 📥 Download
 
-**Get the latest release:** [**Download v0.1.1**](https://github.com/mashu/CW-Contest-Logger/releases/latest)
+**Get the latest release:** [**Download v0.1.1**](https://github.com/mashu/CW-Logger/releases/latest)
 
 - 🪟 **Windows**: Download `.exe` installer or portable version
 - 🍎 **macOS**: Download `.dmg` for Intel or Apple Silicon
@@ -27,7 +27,7 @@ A modern, cross-platform CW contest logging application with real-time DX cluste
 
 ## 🚀 Quick Start
 
-1. [Download](https://github.com/mashu/CW-Contest-Logger/releases/latest) and install for your platform
+1. [Download](https://github.com/mashu/CW-Logger/releases/latest) and install for your platform
 2. Enter your callsign and grid square in Settings
 3. Select a contest or start general logging
 4. Begin logging QSOs!
@@ -47,7 +47,7 @@ A modern, cross-platform CW contest logging application with real-time DX cluste
 
 ## 🐛 Issues & Support
 
-Found a bug or have a feature request? Please [open an issue](https://github.com/mashu/CW-Contest-Logger/issues).
+Found a bug or have a feature request? Please [open an issue](https://github.com/mashu/CW-Logger/issues).
 
 ## 📄 License
 

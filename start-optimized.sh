@@ -5,5 +5,5 @@
 echo "Building optimized production bundle..."
 npm run build:prod
 
-echo "Starting CW Contest Logger with optimized build..."
+echo "Starting CW Logger with optimized build..."
 npx electron . 

@@ -11,8 +11,8 @@
 ### 🪟 Windows
 
 1. Download the latest release:
-   - **Installer**: `CW-Contest-Logger-Setup-0.1.0.exe` (recommended)
-   - **Portable**: `CW-Contest-Logger-0.1.0-portable.exe`
+   - **Installer**: `CW-Logger-Setup-0.1.0.exe` (recommended)
+   - **Portable**: `CW-Logger-0.1.0-portable.exe`
 
 2. **Using Installer**:
    - Run the downloaded `.exe` file
@@ -26,12 +26,12 @@
 ### 🍎 macOS
 
 1. Download the appropriate `.dmg` file:
-   - **Intel Macs**: `CW Contest Logger-0.1.0.dmg`
-   - **Apple Silicon**: `CW Contest Logger-0.1.0-arm64.dmg`
+   - **Intel Macs**: `CW Logger-0.1.0.dmg`
+   - **Apple Silicon**: `CW Logger-0.1.0-arm64.dmg`
 
 2. **Install**:
    - Open the downloaded `.dmg` file
-   - Drag "CW Contest Logger" to Applications folder
+   - Drag "CW Logger" to Applications folder
    - Launch from Applications or Spotlight
 
 **Note**: On first launch, macOS may show a security warning. Go to System Preferences → Security & Privacy → General and click "Open Anyway".
@@ -39,26 +39,26 @@
 ### 🐧 Linux
 
 #### AppImage (Recommended)
-1. Download `CW Contest Logger-0.1.0.AppImage`
+1. Download `CW Logger-0.1.0.AppImage`
 2. Make it executable:
    ```bash
-   chmod +x "CW Contest Logger-0.1.0.AppImage"
+   chmod +x "CW Logger-0.1.0.AppImage"
    ```
 3. Run:
    ```bash
-   ./"CW Contest Logger-0.1.0.AppImage"
+   ./"CW Logger-0.1.0.AppImage"
    ```
 
 #### Tar.gz Archive
-1. Download `cw-contest-logger-0.1.0.tar.gz`
+1. Download `cw-logger-0.1.0.tar.gz`
 2. Extract:
    ```bash
-   tar -xzf cw-contest-logger-0.1.0.tar.gz
-   cd cw-contest-logger-0.1.0
+   tar -xzf cw-logger-0.1.0.tar.gz
+   cd cw-logger-0.1.0
    ```
 3. Run:
    ```bash
-   ./cw-contest-logger
+   ./cw-logger
    ```
 
 ## First Time Setup

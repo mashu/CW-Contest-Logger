@@ -234,8 +234,8 @@ ipcMain.handle('export-adi', async (event, qsos) => {
 });
 
 function generateADI(qsos: any[]): string {
-  let adi = 'ADIF Export from CW Contest Logger\n';
-  adi += '<PROGRAMID:17>CW Contest Logger\n';
+  let adi = 'ADIF Export from CW Logger\n';
+  adi += '<PROGRAMID:9>CW Logger\n';
   adi += '<PROGRAMVERSION:3>1.0\n';
   adi += '<EOH>\n\n';
 
@@ -340,7 +340,7 @@ ipcMain.handle('qrz-lookup', async (event, callsign: string, username?: string, 
 
 async function getQRZSession(username: string, password: string): Promise<any> {
   try {
-    const response = await fetch(`https://xmldata.qrz.com/xml/current/?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&agent=ContestLogger/1.0`);
+    const response = await fetch(`https://xmldata.qrz.com/xml/current/?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&agent=CWLogger/1.0`);
     
     if (!response.ok) {
       return { success: false, error: 'QRZ server error' };
